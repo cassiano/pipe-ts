@@ -54,7 +54,7 @@ Notice that the piped function returned by `pipe()` gets fully typed, expecting 
 
 ##### Compose:
 
-Simply supply the function to be composed as the 1st parameter of the `pipe()` HOF.
+Simply supply the function to be composed as the 1st parameter of the `compose()` HOF.
 
 ```ts
 import { curry } from '@cdandrea/currying-ts'
