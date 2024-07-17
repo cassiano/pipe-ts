@@ -19,15 +19,15 @@
 Install from `npm` using your favorite package manager:
 
 ```
-npm install @cdandrea/pipe-ts
+npm install @cdandrea/piping-ts
 ```
 
 ```
-yarn add @cdandrea/pipe-ts
+yarn add @cdandrea/piping-ts
 ```
 
 ```
-pnpm install @cdandrea/pipe-ts
+pnpm install @cdandrea/piping-ts
 ```
 
 ## Usage
@@ -36,7 +36,7 @@ Simply supply the function to be curried as the 1st parameter of the `pipe()` HO
 
 ```ts
 import { curry } from '@cdandrea/currying-ts'
-import { pipe } from '@cdandrea/pipe-ts'
+import { pipe } from '@cdandrea/piping-ts'
 
 const prop = curry((prop: string, obj: Record<string, number>) => obj[prop])
 const add = curry((a: number, b: number) => b + a)

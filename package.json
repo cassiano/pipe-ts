@@ -1,5 +1,5 @@
 {
-  "name": "@cdandrea/pipe-ts",
+  "name": "@cdandrea/piping-ts",
   "version": "1.0.0",
   "description": "100% type-safe pipe() function written in TS",
   "main": "dist/pipe.js",
@@ -16,9 +16,11 @@
     "pipe",
     "piping",
     "function piping",
+    "functional piping",
     "compose",
     "composition",
     "function composition",
+    "functional composition",
     "type-safe",
     "100% type-safe",
     "fully type-safe",
