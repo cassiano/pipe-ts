@@ -11,7 +11,7 @@
 - 100% type-safe
 - Supports functions that have up to 30 parameters
 - Fully compatible with JavaScript
-- Very small (only 227 bytes gzipped after bundling)
+- Very small (both functions have below 250 bytes gzipped after bundling)
 - No external dependencies
 
 ## Installation
@@ -34,7 +34,7 @@ pnpm install @cdandrea/piping-ts
 
 ##### Pipe:
 
-Simply supply the function to be piped as the 1st parameter of the `pipe()` HOF.
+Simply supply the functions to be piped as parameters of the `pipe()` HOF.
 
 ```ts
 import { curry } from '@cdandrea/currying-ts'
@@ -54,7 +54,7 @@ Notice that the piped function returned by `pipe()` gets fully typed, expecting 
 
 ##### Compose:
 
-Simply supply the function to be composed as the 1st parameter of the `compose()` HOF.
+Simply supply the functions to be composed as parameters of the `compose()` HOF.
 
 ```ts
 import { curry } from '@cdandrea/currying-ts'
