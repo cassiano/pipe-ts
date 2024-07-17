@@ -9,7 +9,11 @@
     "dist/pipe.js",
     "dist/pipe.d.ts",
     "dist/pipe.d.ts.map",
-    "src/pipe.ts"
+    "src/pipe.ts",
+    "dist/compose.js",
+    "dist/compose.d.ts",
+    "dist/compose.d.ts.map",
+    "src/compose.ts"
   ],
   "keywords": [
     "typescript",
