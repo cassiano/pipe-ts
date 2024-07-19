@@ -4,16 +4,10 @@
 >
 > Piping is basically the same idea, but in reverse order, where the functions are provided in a more natural order (i.e. the same order as they are actually invoked).
 >
-> This package provides a simple way to transform functions into their piped or composed versions using [Higher-Order Functions](https://en.wikipedia.org/wiki/Higher-order_function) (HOFs) called "pipe()" and "compose()", respectively, while keeping the original functions' signatures, making sure that, for each function in the sequence:
+> This package provides a simple way to transform functions into their piped or composed versions using [Higher-Order Functions](https://en.wikipedia.org/wiki/Higher-order_function) (HOFs) called `pipe()` and `compose()`, respectively, while keeping the original functions signatures, making sure that, for each function in the sequence:
 >
-> - `pipe()`: the type of the output (result) of the **previous** function will always match the type of
->   the input of the **next** function. The type of the parameter of the piped function will always
->   match the type of its **first** function's parameter. The final result will have the type of its
->   **last** function.
-> - `compose()`: the type of the input of the **previous** function will always match the type of
->   the output (result) of the **next** function. The type of the parameter of the composed function
->   will always match the type of its **last** function's parameter. The final result will have the
->   type of its **first** function.
+> - `pipe()`: the type of the **output** (result) of the **previous** function will always match the type of the **input** of the **next** function. The type of the parameter of the piped function will always match the type of its **first** function's parameter and the final result will have the type of its **last** function.
+> - `compose()`: the type of the **input** of the **previous** function will always match the type of the **output** (result) of the **next** function. The type of the parameter of the composed function will always match the type of its **last** function's parameter and the final result will have the type of its **first** function.
 
 ## Features
 
