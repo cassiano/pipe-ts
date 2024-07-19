@@ -44,20 +44,19 @@ Basic example:
 ```ts
 import { pipe } from '@cdandrea/piping-ts'
 
-const plus1 = (n: number) => n + 1
-const isEven = (n: number) => n % 2 === 0
-const asString = (b: boolean) => b.toString()
-const asArray = (s: string) => [s]
+const isEven = (n: number): boolean => n % 2 === 0
+const asString = (b: boolean): string => b.toString()
+const asArray = (s: string): string[] => [s]
 
-const f = pipe(plus1, isEven, asString, asArray)
+const f = pipe(isEven, asString, asArray)
 
-// f()'s signature will be: `const f: (a1: number) => string[]`
+// f's signature will be: `(a1: number) => string[]`
 //
-// Notice how f() expects as input the single parameter of its
-// 1st parameter (`plus1` function) and returns the result of
-// its last parameter (`asArray` function), which is `string[]`.
+// Notice how `f` expects as input the same input as its 1st
+// function parameter, `isEven`, and returns the result of its
+// last function parameter, `asArray`, which is `string[]`.
 
-console.log(f(10)) // Prints ["false"]
+console.log(f(10)) // Prints ["true"]
 ```
 
 More elaborate example, using `pipe()` and `curry()`:
