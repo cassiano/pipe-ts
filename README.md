@@ -6,8 +6,8 @@
 >
 > This package provides a simple way to transform functions into their piped or composed versions using [Higher-Order Functions](https://en.wikipedia.org/wiki/Higher-order_function) (HOFs) called `pipe()` and `compose()`, respectively, while keeping the original functions signatures, making sure that, for each function in the sequence:
 >
-> - `pipe()`: the type of the **output** (result) of the **previous** function will always match the type of the **input** of the **next** function. The type of the parameter of the piped function will always match the type of its **first** function's parameter and the final result will have the type of its **last** function.
-> - `compose()`: the type of the **input** of the **previous** function will always match the type of the **output** (result) of the **next** function. The type of the parameter of the composed function will always match the type of its **last** function's parameter and the final result will have the type of its **first** function.
+> - `pipe()`: the type of the **output** (result) of the **previous** function will always match the type of the **input** of the **next** function. The type of the **parameter** of the piped function will always match the type of its **first** function's parameter and the final **result** will have the type of its **last** function.
+> - `compose()`: the type of the **input** of the **previous** function will always match the type of the **output** (result) of the **next** function. The type of the **parameter** of the composed function will always match the type of its **last** function's parameter and the final **result** will have the type of its **first** function.
 
 ## Features
 
@@ -52,9 +52,10 @@ const f = pipe(isEven, asString, asArray)
 
 // f's signature will be: `(a1: number) => string[]`
 //
-// Notice how `f` expects as input the same input as its 1st
-// function parameter, `isEven`, and returns the result of its
-// last function parameter, `asArray`, which is `string[]`.
+// Notice how `f` expects a `number` as input, which is the same
+// type expected by its first function parameter, `isEven`, and
+// returns a `string[]` as the result, which is the result of
+// its last function parameter, `asArray`.
 
 console.log(f(10)) // Prints ["true"]
 ```
