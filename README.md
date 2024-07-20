@@ -1,6 +1,6 @@
 # 100% type-safe `pipe()` and `compose()` functions written in TS
 
-> [Function composition](<https://en.wikipedia.org/wiki/Function_composition_(computer_science)>) is an act or mechanism to combine simple functions to build more complicated ones. Like the usual composition of functions in mathematics, the result of each function is passed as the argument of the next, and the result of the last one is the result of the whole. Source: Wikipedia.
+> According to Wikipedia, "[Function composition](<https://en.wikipedia.org/wiki/Function_composition_(computer_science)>) is an act or mechanism to combine simple functions to build more complicated ones. Like the usual composition of functions in mathematics, the result of each function is passed as the argument of the next, and the result of the last one is the result of the whole".
 >
 > Piping is basically the same idea, but in reverse order, where the functions are provided in a more natural order (i.e. the same order as they are actually invoked).
 >
