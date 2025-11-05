@@ -1,6 +1,6 @@
 {
   "name": "@cdandrea/piping-ts",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "100% type-safe pipe() and compose() functions written in TS",
   "main": "dist/pipe.js",
   "types": "dist/pipe.d.ts",
