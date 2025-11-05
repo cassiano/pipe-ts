@@ -1,60 +1,98 @@
-type PipedFunctionType = (arg: unknown) => unknown
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// deno-lint-ignore no-explicit-any
+export type FnType = (...args: any[]) => any
+
+type Fail<Message extends string> = [never, `Type Error: ${Message}`]
+
+type NonMatchingParameter<
+  FnIndex extends number,
+  ExpectedArg extends string,
+  ActualArg extends string,
+> = `Expected parameter type '${ExpectedArg}' of function with index ${FnIndex} to match return type '${ActualArg}' of previous one` // Index starts at 1 (not 0). If pipe, index should count from right to left if compose, from left to right.
+// 'Non matching parameter'
+
+type InvalidFunctionArity<
+  FnIndex extends number,
+  ActualFnArity extends number,
+> = `Expected only 1 argument for function with index ${FnIndex}, but got ${ActualFnArity}` // Index starts at 1 (not 0). If pipe, index should count from right to left if compose, from left to right.
+// 'Invalid function arity'
+
+export type PipedFunction<Fns extends FnType[]> = Fns extends [
+  // At least 2 args were supplied and are all functions?
+  infer FirstFn extends FnType,
+  infer SecondFn extends FnType,
+  ...infer RemainingFns extends FnType[],
+]
+  ? PipeResult<
+      Parameters<FirstFn>,
+      ReturnTypeOfLastFn<[SecondFn, ...RemainingFns], FirstFn>
+    >
+  : never
+
+type PipeResult<
+  FirstFnParameters extends unknown[],
+  ReturnTypeOfLastFnResult,
+> = ReturnTypeOfLastFnResult extends [never, string]
+  ? ReturnTypeOfLastFnResult[1] // Match failed. Return an error message.
+  : (...args: FirstFnParameters) => ReturnTypeOfLastFnResult // Match ok. Return a function.
+
+type ReturnTypeOfLastFn<
+  Fns extends FnType[],
+  PreviousFn extends FnType,
+> = Fns extends [
+  infer NextFn extends FnType, // Is there at least one remaining function in the sequence?
+  ...infer RemainingFns extends FnType[],
+]
+  ? Parameters<NextFn>['length'] extends 1 // Next function in the sequence has exactly 1 parameter?
+    ? ReturnType<PreviousFn> extends Parameters<NextFn>[0] // The return type of the previous function matches (is a subset of) the (sole) parameter type of the next one?
+      ? ReturnTypeOfLastFn<RemainingFns, NextFn>
+      : Fail<
+          NonMatchingParameter<
+            Fns['length'],
+            Parameters<NextFn>[0],
+            ReturnType<PreviousFn>
+          >
+        >
+    : Fail<InvalidFunctionArity<Fns['length'], Parameters<NextFn>['length']>>
+  : ReturnType<PreviousFn> // The return type of the last function will represent the return type of the entire sequence.
 
 /**
  * A function that pipes a family of functions sequentially, where the result of each function is
  * passed as the argument of the next, and the result of the last one is the result of the whole.
  *
- * @template T - The return type of the piped function (always inferred automatically by TS).
- * @template F1, F2 … Fn - The types of each of the n function's arguments (always inferred
- * automatically by TS).
- * @param {f1: (a1: F1) => F2} f1 - The first function to be piped.
- * @param {f2: (a2: F2) => F3} f2 - The second function to be piped.
- * @param {} …
- * @param {fn: (an: Fn) => T} fn - The last function to be piped.
- * @returns {(a1: F1) => T} - The piped function, expecting the parameter of the first function and
+ * @template Fns - The signatures of the piped functions (always inferred automatically by TS).
+ * @param {Fn} fn - The function to be piped.
+ * @returns {PipedFunction<Fns>} - The piped function, expecting the parameter of the first function and
  * returning the result of the last one.
  */
 
-// TS types generator: https://tsplay.dev/N5YxVN
+export const pipe = <Fns extends FnType[]>(...fns: Fns): PipedFunction<Fns> => {
+  const [headFn, ...tailFns] = fns
 
-// ====================================
-// Copy generated types below this line
-/* prettier-ignore */ export function pipe<T, F1>(f1: (a1: F1) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2>(f1: (a1: F1) => F2, f2: (a2: F2) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => F26, f26: (a26: F26) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26, F27>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => F26, f26: (a26: F26) => F27, f27: (a27: F27) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26, F27, F28>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => F26, f26: (a26: F26) => F27, f27: (a27: F27) => F28, f28: (a28: F28) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26, F27, F28, F29>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => F26, f26: (a26: F26) => F27, f27: (a27: F27) => F28, f28: (a28: F28) => F29, f29: (a29: F29) => T): (a1: F1) => T;
-/* prettier-ignore */ export function pipe<T, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16, F17, F18, F19, F20, F21, F22, F23, F24, F25, F26, F27, F28, F29, F30>(f1: (a1: F1) => F2, f2: (a2: F2) => F3, f3: (a3: F3) => F4, f4: (a4: F4) => F5, f5: (a5: F5) => F6, f6: (a6: F6) => F7, f7: (a7: F7) => F8, f8: (a8: F8) => F9, f9: (a9: F9) => F10, f10: (a10: F10) => F11, f11: (a11: F11) => F12, f12: (a12: F12) => F13, f13: (a13: F13) => F14, f14: (a14: F14) => F15, f15: (a15: F15) => F16, f16: (a16: F16) => F17, f17: (a17: F17) => F18, f18: (a18: F18) => F19, f19: (a19: F19) => F20, f20: (a20: F20) => F21, f21: (a21: F21) => F22, f22: (a22: F22) => F23, f23: (a23: F23) => F24, f24: (a24: F24) => F25, f25: (a25: F25) => F26, f26: (a26: F26) => F27, f27: (a27: F27) => F28, f28: (a28: F28) => F29, f29: (a29: F29) => F30, f30: (a30: F30) => T): (a1: F1) => T;
-// Copy generated types above this line
-// ====================================
-
-export function pipe(...fns: PipedFunctionType[]) {
-  const [firstFn, ...remainingFns] = fns
-
-  return (arg: PipedFunctionType[]) =>
-    remainingFns.reduce((acc, fn) => fn(acc), firstFn(arg))
+  return ((...args: unknown[]) =>
+    tailFns.reduce(
+      (acc: unknown, nextFn) => nextFn(acc),
+      headFn(...args),
+    )) as unknown as PipedFunction<Fns>
 }
+
+type Reverse<T extends unknown[]> = T extends [infer Head, ...infer Tail]
+  ? [...Reverse<Tail>, Head]
+  : []
+
+type ComposedFunction<Fns extends FnType[]> = PipedFunction<Reverse<Fns>>
+
+/**
+ * A function that composes a family of functions sequentially, where the result of each function is
+ * passed as the argument of the previous, starting with the last, and the result of the first one is
+ * the result of the whole.
+ *
+ * @template Fns - The signatures of the composed functions (always inferred automatically by TS).
+ * @param {Fn} fn - The function to be composed.
+ * @returns {ComposedFunction<Fns>} - The composed function, expecting the parameter of the last function and
+ * returning the result of the first one.
+ */
+
+export const compose = <Fns extends FnType[]>(
+  ...fns: Fns
+): ComposedFunction<Fns> => pipe(...fns.reverse())

@@ -1,7 +1,6 @@
-import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts';
+import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
 
-import { compose } from '../src/compose.ts';
-import { pipe } from '../src/pipe.ts';
+import { pipe, compose } from '../src/pipe.ts'
 
 Deno.test('pipe()', () => {
   const f = pipe(
